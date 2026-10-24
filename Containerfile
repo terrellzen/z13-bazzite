@@ -14,7 +14,7 @@ COPY scripts/btusb.conf /etc/modprobe.d/btusb.conf
 COPY scripts/usb-wakeup-fix /usr/lib/systemd/system-sleep/usb-wakeup-fix
 COPY scripts/gz302ea-sensors.conf /etc/sensors.d/gz302ea.conf
 
-# 3. Copy build scripts, then install dependencies.
+# Copy installation scripts into the build image.
 COPY scripts/install-z13-plus.sh /tmp/z13-build/install-z13-plus.sh
 COPY scripts/install-tablet-kit.sh /tmp/z13-build/install-tablet-kit.sh
 COPY scripts/build-ryzen-smu.sh /tmp/z13-build/build-ryzen-smu.sh
