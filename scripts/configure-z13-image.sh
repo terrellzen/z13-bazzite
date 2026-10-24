@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+chmod 0755 /usr/bin/z13-post-setup /usr/libexec/z13-configure-permissions /usr/libexec/z13-desktop-setup
+chmod 0644 /usr/share/applications/z13-first-time-setup.desktop \
+    /etc/xdg/autostart/z13-desktop-setup.desktop \
+    /usr/share/z13-setup/libuser.conf \
+    /usr/share/polkit-1/actions/org.z13.configure-permissions.policy
+
 # On Fedora the qt6-qttools executable is qdbus-qt6, not qdbus6.
 # The tablet kit requires the latter name for touchscreen detection.
 if [[ ! -x /usr/bin/qdbus-qt6 ]]; then

@@ -59,3 +59,23 @@ rebooted into it and checked it.
   [guide](https://rootandraid.com/guides/custom-bazzite-rog-flow-z13/#bug-1-a-black-screen-at-full-brightness) has the exact ones.
 - Hardware-specific: the fixes were developed and tested on a GZ302EA. On other hardware, keep the method and change
   the fixes.
+
+## First-time hardware permissions
+
+On your first KDE login, open **Z13 First-Time Setup** on the desktop or in the
+application menu. Choose **Configure permissions** and authenticate with KDE.
+The assistant adds only your local account to `users`, which z13ctl-plus and
+z13gui-plus require. Log out and log back in afterward.
+
+You may move or copy the launcher to Documents; it uses the installed program's
+absolute path. The assistant is safe to run again. Deleting the desktop shortcut
+will not cause it to return on later logins. If your desktop is disabled or cannot
+accept the shortcut, use the application menu.
+
+The graphical assistant runs as your user. Only the group helper runs through
+Polkit, with administrator authentication. It uses libuser's local files/shadow
+backends to create an `/etc/group` entry with the vendor GID when `users` lives
+only in `/usr/lib/group`, preserves vendor and local members, and appends your
+account. It never writes to `/usr` at runtime or changes sudoers. The KDE
+autostart hook runs without privileges and records its one-time offer under
+`${XDG_STATE_HOME:-~/.local/state}/z13-setup`.

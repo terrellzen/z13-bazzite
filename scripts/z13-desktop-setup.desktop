@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Z13 Setup Desktop Shortcut
+Comment=Offer the Z13 setup shortcut once per user
+Exec=/usr/libexec/z13-desktop-setup
+TryExec=/usr/libexec/z13-desktop-setup
+OnlyShowIn=KDE;
+NoDisplay=true
+X-KDE-autostart-phase=2
