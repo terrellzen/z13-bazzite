@@ -23,7 +23,7 @@ RUN rpm-ostree install \
     && ostree container commit
 
 # 4. Install the latest z13ctl-plus and z13gui-plus RPM releases.
-#    Each image rebuild checks GitHub for the latest stable releases.
+#    Each uncached build checks GitHub for the latest stable releases.
 ARG Z13_RELEASE_REFRESH=0
 RUN echo "Release refresh: ${Z13_RELEASE_REFRESH}" \
     && mkdir -p /tmp/z13-packages \
@@ -38,7 +38,40 @@ RUN echo "Release refresh: ${Z13_RELEASE_REFRESH}" \
     && rm -rf /tmp/z13-packages \
     && ostree container commit
 
-# 5. Install the latest z13-tablet-kit for posture detection, rotation, and touch gestures.
+# 5. Configure z13ctl-plus permissions and automatic startup.
+#    The RPM provides udev rules and a boot-time permissions service.
+#    Enable user services globally without running setup on the deployed system.
+RUN set -eux; \
+    rpm -ql z13ctl-plus | grep -E 'udev/rules.d/.*\.rules'; \
+    systemctl cat z13ctl-plus-perms.service; \
+    systemctl enable z13ctl-plus-perms.service; \
+    systemctl --global enable z13ctl-plus.socket z13ctl-plus.service; \
+    if systemctl --global list-unit-files z13gui-plus.service | grep -q z13gui-plus.service; then \
+        systemctl --global enable z13gui-plus.service; \
+    else \
+        echo "z13gui-plus.service not provided; GUI remains manually launchable"; \
+    fi; \
+    ostree container commit
+
+# 6. Ensure the existing Bazzite user belongs to the hardware access group.
+#    Run at boot before graphical login; do not modify user accounts during image build.
+RUN printf '%s\n' \
+    '[Unit]' \
+    'Description=Configure Z13 hardware access group' \
+    'Before=display-manager.service' \
+    'ConditionPathExists=/var/home/superdark132' \
+    '' \
+    '[Service]' \
+    'Type=oneshot' \
+    'ExecStart=/usr/sbin/usermod -aG users superdark132' \
+    '' \
+    '[Install]' \
+    'WantedBy=graphical.target' \
+    > /usr/lib/systemd/system/z13-user-group.service \
+    && systemctl enable z13-user-group.service \
+    && ostree container commit
+
+# 7. Install the latest z13-tablet-kit for posture detection, rotation, and touch gestures.
 #    Install system-wide and adjust its user services for the new paths.
 RUN git clone --depth 1 https://github.com/aic0d3r/z13-tablet-kit.git /tmp/z13-tablet-kit \
     && mkdir -p /usr/lib/z13-tablet-kit /usr/lib/systemd/user /usr/lib/udev/rules.d \
@@ -54,7 +87,7 @@ RUN git clone --depth 1 https://github.com/aic0d3r/z13-tablet-kit.git /tmp/z13-t
     && rm -rf /tmp/z13-tablet-kit \
     && ostree container commit
 
-# 6. Build the Strix Halo Ryzen SMU driver against Bazzite's installed kernel.
+# 8. Build the Strix Halo Ryzen SMU driver against Bazzite's installed kernel.
 #    Uses amkillam/ryzen_smu instead of the original upstream driver.
 #    Matching kernel development files must exist in the base image.
 RUN set -eux; \
@@ -71,7 +104,7 @@ RUN set -eux; \
     rm -rf /tmp/ryzen_smu; \
     ostree container commit
 
-# 7. Configure Bluetooth, enable hardware fixes, and finalize the image.
+# 9. Configure Bluetooth, enable hardware fixes, and finalize the image.
 RUN chmod +x /usr/bin/bt-auto-reconnect.sh /usr/lib/systemd/system-sleep/usb-wakeup-fix \
     && sed -i 's/^#AutoEnable=true/AutoEnable=true/' /etc/bluetooth/main.conf \
     && sed -i 's/^#Privacy = off/Privacy = device/' /etc/bluetooth/main.conf \
