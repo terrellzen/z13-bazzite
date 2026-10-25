@@ -9,9 +9,10 @@ if (( ${#kernels[@]} != 1 )); then
 fi
 kernel="${kernels[0]}"
 if [[ ! -d "/usr/src/kernels/$kernel" ]]; then
-    echo "ERROR: Missing matching kernel-devel: /usr/src/kernels/$kernel" >&2
-    exit 1
+    rpm-ostree install "kernel-devel-$kernel"
+    rpm-ostree cleanup -m
 fi
+[[ -d "/usr/src/kernels/$kernel" ]] || { echo "ERROR: Missing matching kernel-devel for $kernel" >&2; exit 1; }
 
 src="$(mktemp -d)"
 trap 'rm -rf "$src"' EXIT

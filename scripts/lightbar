@@ -2,7 +2,7 @@
 # Thin wrapper around z13ctl for the rear window lightbar on the
 # ASUS ROG Flow Z13 (GZ302EA). Powered by https://github.com/dahui/z13ctl.
 #
-# z13ctl handles the device cleanly while asusd is running; raw HID and
+# z13ctl owns lighting control; raw HID and
 # asusd D-Bus paths both proved unreliable on asusd 6.3.7 + kernel 6.19.
 
 set -e

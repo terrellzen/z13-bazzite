@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=Z13 First-Time Setup
-Comment=Configure hardware permissions for z13ctl-plus and z13gui-plus
+Comment=Configure hardware permissions for z13ctl and z13gui
 Exec=/usr/bin/z13-post-setup
 Icon=preferences-system
 Terminal=false

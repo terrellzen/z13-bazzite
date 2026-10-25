@@ -19,7 +19,7 @@ if configured; then
     exit 0
 fi
 if ! kdialog --title 'Z13 First-Time Setup' --yes-label 'Configure permissions' --no-label 'Cancel' --yesno \
-    'z13ctl-plus and z13gui-plus need your account to belong to the users group to access Z13 hardware.
+    'z13ctl and z13gui need your account to belong to the users group to access Z13 hardware.
 
 Configure permissions for your account? KDE will request administrator authentication. Afterward, log out and log back in.'; then
     exit 0
