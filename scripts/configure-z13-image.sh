@@ -12,9 +12,22 @@ if (( ${#remove[@]} )); then
     rpm-ostree override remove "${remove[@]}"
 fi
 
-# Only the Bluetooth helpers are enabled by this image. Layered Z13 packages
-# own their binaries, hardware permissions, and service enablement.
-install -d /usr/lib/systemd/system/multi-user.target.wants
+# RPM post-install scripts can create /etc enablement links during the build.
+# Keep enablement in /usr so it follows the image on rebase.
+for link in /etc/systemd/system/multi-user.target.wants/z13ctl-plus-perms.service \
+    /etc/systemd/user/sockets.target.wants/z13ctl-plus.socket \
+    /etc/systemd/user/graphical-session.target.wants/z13ctl-plus.service \
+    /etc/systemd/user/graphical-session.target.wants/z13gui-plus.service; do
+    if [[ -L $link ]]; then unlink "$link"; fi
+done
+install -d /usr/lib/systemd/system/multi-user.target.wants \
+    /usr/lib/systemd/user/sockets.target.wants \
+    /usr/lib/systemd/user/graphical-session.target.wants
+ln -sfn ../z13ctl-plus-perms.service /usr/lib/systemd/system/multi-user.target.wants/z13ctl-plus-perms.service
+ln -sfn ../z13ctl-plus.socket /usr/lib/systemd/user/sockets.target.wants/z13ctl-plus.socket
+for unit in z13ctl-plus.service z13gui-plus.service; do
+    ln -sfn "../$unit" "/usr/lib/systemd/user/graphical-session.target.wants/$unit"
+done
 chmod +x /usr/bin/bt-auto-reconnect.sh /usr/lib/systemd/system-sleep/usb-wakeup-fix
 sed -i 's/^#AutoEnable=true/AutoEnable=true/' /etc/bluetooth/main.conf
 sed -i 's/^#Privacy = off/Privacy = device/' /etc/bluetooth/main.conf
